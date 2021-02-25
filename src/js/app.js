@@ -15,7 +15,7 @@ class App {
 
     const aspect = window.innerWidth / window.innerHeight
     this.camera = new THREE.PerspectiveCamera(FOV, aspect, NEAR, FAR)
-    this.camera.position.z = 2
+    this.camera.position.z = 10
 
     this.light = new THREE.DirectionalLight(0xFFFFFF, 1)
     this.light.position.set(-1, 2, 4)
@@ -24,7 +24,21 @@ class App {
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1)
     const cubeMaterial = new THREE.MeshLambertMaterial({color: 0x44aa88})
     this.cube = new THREE.Mesh(cubeGeometry, cubeMaterial)
+    this.cube.position.set(-4, -3, -10)
     this.scene.add(this.cube)
+
+    const sphereGeometry = new THREE.CircleGeometry(1, 100, 100)
+    const sphereMaterial = new THREE.MeshLambertMaterial({color: 0xff4343})
+    this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial)
+    this.sphere.position.set(4, 3, 0)
+    this.scene.add(this.sphere)
+
+    this.direct = new THREE.Vector3()
+
+    this.cube2 = new THREE.Mesh(cubeGeometry, cubeMaterial)
+    this.scene.add(this.cube2)
+
+    this.angle = 0
 
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight)
@@ -44,13 +58,23 @@ class App {
   }
 
   render () {
-    this.cube.rotation.x += 0.005
-    this.cube.rotation.y += 0.005
-
     if (this.resizeRendererToDisplaySize())  {
       const canvas = this.renderer.domElement
       this.camera.aspect = canvas.clientWidth / canvas.clientHeight
       this.camera.updateProjectionMatrix()
+    }
+
+    const distance = this.cube.position.distanceToSquared(this.sphere.position)
+
+    if (distance > 0.001) {
+      this.sphere.position.y += -0.04
+      this.direct.subVectors(this.sphere.position, this.cube.position)
+      this.direct.setLength(0.1)
+      this.cube.position.add(this.direct)
+
+      this.angle += 0.2
+      this.cube2.position.x = this.sphere.position.x + 2 * Math.sin(this.angle)
+      this.cube2.position.y = this.sphere.position.y + 2 * Math.cos(this.angle)
     }
 
     this.renderer.render(this.scene, this.camera);
